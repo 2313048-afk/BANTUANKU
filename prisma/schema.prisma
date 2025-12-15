@@ -11,3 +11,98 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Role {
+  roleId   String @id @map("role_id")
+  roleName String? @map("role-_name")
+  users    User[]
+
+  @@map("ROLES")
+}
+
+model User {
+  userId        String @map("user_id")
+  username      String?
+  password      String?
+  idRole        String @unique @map("id_role")
+  role          Role   @relation(fields: [idRole], references: [roleId], onUpdate: NoAction, onDelete: NoAction)
+
+  @@id([idRole])
+  @@map("USERS")
+}
+
+model RT {
+  rtId     String @id @unique @map("rt_id")
+  rtName   String? @map("rt_name")
+  citizens Citizen[]
+
+  @@map("RT")
+}
+
+model Citizen {
+  citizenId         String @id @map("citizen_id")
+  rtId              String? @unique @map("rt_id")
+  username          String?
+  idCardNumber      BigInt? @map("id_card_number")
+  birthDate         String? @map("birth_date")
+  gender            String?
+  age               BigInt?
+  address           String?
+  familyCardNumber  BigInt? @map("family_card_number")
+  occupation        String?
+  monthlyIncome     String? @map("monthly_income")
+  aidStatus         String? @map("aid_status")
+  rt                RT? @relation(fields: [rtId], references: [rtId], onUpdate: NoAction, onDelete: NoAction)
+  aidRecipients     AidRecipient[]
+  validations       BansosValidation[]
+
+  @@map("CITIZEN")
+}
+
+model AidProgram {
+  aidId                         String @id @unique @map("aid_id")
+  aidName                       String? @map("aid_name")
+  descriptionOfSocialAssistance String? @map("description_of_social_assistance")
+  startDate                     DateTime? @db.Date @map("start_date")
+  endDate                       DateTime? @db.Date @map("end_date")
+  status                        String?
+  aidRecipients                 AidRecipient[]
+  distributionReports           DistributionReport[]
+
+  @@map("AID_PROGRAM")
+}
+
+model AidRecipient {
+  recipientId     String @id @unique @map("recipient_id")
+  citizenId       String? @map("citizen_id")
+  aidId           String? @map("aid_id")
+  receiveDate     DateTime? @db.Date @map("receive_date")
+  recipientStatus String? @map("recipient_status")
+  citizen         Citizen? @relation(fields: [citizenId], references: [citizenId], onUpdate: NoAction, onDelete: NoAction)
+  aidProgram      AidProgram? @relation(fields: [aidId], references: [aidId], onUpdate: NoAction, onDelete: NoAction)
+
+  @@map("AID_RECIPIENT")
+}
+
+model BansosValidation {
+  validationId     String @id @unique @map("validation_id")
+  userId           String? @map("user_id")
+  citizenId        String? @map("citizen_id")
+  validationResult Boolean? @map("validation_result")
+  notes            String? @db.Char(1)
+  citizen          Citizen? @relation(fields: [citizenId], references: [citizenId], onUpdate: NoAction, onDelete: NoAction)
+
+  @@map("BANSOS_VALIDATION")
+}
+
+model DistributionReport {
+  reportId       String @id @unique @map("report_id")
+  governmentId   String? @map("government_id")
+  aidId          String? @map("aid_id")
+  totalRecipients String? @map("total_recipients")
+  reportDate     DateTime? @db.Date @map("report_date")
+  aidProgram     AidProgram? @relation(fields: [aidId], references: [aidId], onUpdate: NoAction, onDelete: NoAction)
+
+  @@map("DISTRIBUTION_REPORT")
+}
+
