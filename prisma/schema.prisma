@@ -12,15 +12,23 @@ datasource db {
   provider = "postgresql"
 }
 
+<<<<<<< HEAD
 model ROLES {
   id_role  String   @id @map("id_role")
   role_name String  @map("role_name")
 
   users USERS[]
+=======
+model Role {
+  roleId   String @id @map("role_id")
+  roleName String? @map("role-_name")
+  users    User[]
+>>>>>>> 7aad3534e278b06ae17bb209a58f850b02e5e641
 
   @@map("ROLES")
 }
 
+<<<<<<< HEAD
 model USERS {
   user_id  String   @id @map("user_id")
   username String?  @unique @map("username")
@@ -66,10 +74,61 @@ model AID_PROGRAM {
 
   aidRecipient       AID_RECIPIENT[]
   distributionReport DISTRIBUTION_REPORT[]
+=======
+model User {
+  userId        String @map("user_id")
+  username      String?
+  password      String?
+  idRole        String @unique @map("id_role")
+  role          Role   @relation(fields: [idRole], references: [roleId], onUpdate: NoAction, onDelete: NoAction)
+
+  @@id([idRole])
+  @@map("USERS")
+}
+
+model RT {
+  rtId     String @id @unique @map("rt_id")
+  rtName   String? @map("rt_name")
+  citizens Citizen[]
+
+  @@map("RT")
+}
+
+model Citizen {
+  citizenId         String @id @map("citizen_id")
+  rtId              String? @unique @map("rt_id")
+  username          String?
+  idCardNumber      BigInt? @map("id_card_number")
+  birthDate         String? @map("birth_date")
+  gender            String?
+  age               BigInt?
+  address           String?
+  familyCardNumber  BigInt? @map("family_card_number")
+  occupation        String?
+  monthlyIncome     String? @map("monthly_income")
+  aidStatus         String? @map("aid_status")
+  rt                RT? @relation(fields: [rtId], references: [rtId], onUpdate: NoAction, onDelete: NoAction)
+  aidRecipients     AidRecipient[]
+  validations       BansosValidation[]
+
+  @@map("CITIZEN")
+}
+
+model AidProgram {
+  aidId                         String @id @unique @map("aid_id")
+  aidName                       String? @map("aid_name")
+  descriptionOfSocialAssistance String? @map("description_of_social_assistance")
+  startDate                     DateTime? @db.Date @map("start_date")
+  endDate                       DateTime? @db.Date @map("end_date")
+  status                        String?
+  aidRecipients                 AidRecipient[]
+  distributionReports           DistributionReport[]
+>>>>>>> 7aad3534e278b06ae17bb209a58f850b02e5e641
 
   @@map("AID_PROGRAM")
 }
 
+<<<<<<< HEAD
 model AID_RECIPIENT {
   recipient_id    String   @id @map("recipient_id")
   citizen_id      String?  @map("citizen_id")
@@ -79,10 +138,21 @@ model AID_RECIPIENT {
 
   citizenData CITIZEN_DATA? @relation(fields: [citizen_id], references: [citizen_id], onUpdate: NoAction, onDelete: NoAction)
   aidProgram  AID_PROGRAM?  @relation(fields: [aid_id], references: [aid_id], onUpdate: NoAction, onDelete: NoAction)
+=======
+model AidRecipient {
+  recipientId     String @id @unique @map("recipient_id")
+  citizenId       String? @map("citizen_id")
+  aidId           String? @map("aid_id")
+  receiveDate     DateTime? @db.Date @map("receive_date")
+  recipientStatus String? @map("recipient_status")
+  citizen         Citizen? @relation(fields: [citizenId], references: [citizenId], onUpdate: NoAction, onDelete: NoAction)
+  aidProgram      AidProgram? @relation(fields: [aidId], references: [aidId], onUpdate: NoAction, onDelete: NoAction)
+>>>>>>> 7aad3534e278b06ae17bb209a58f850b02e5e641
 
   @@map("AID_RECIPIENT")
 }
 
+<<<<<<< HEAD
 model DATA_VALIDATION {
   validation_id    String   @id @map("validation_id")
   admin_user_id    String?  @map("admin_user_id")
@@ -108,3 +178,27 @@ model DISTRIBUTION_REPORT {
 
   @@map("DISTRIBUTION_REPORT")
 }
+=======
+model BansosValidation {
+  validationId     String @id @unique @map("validation_id")
+  userId           String? @map("user_id")
+  citizenId        String? @map("citizen_id")
+  validationResult Boolean? @map("validation_result")
+  notes            String? @db.Char(1)
+  citizen          Citizen? @relation(fields: [citizenId], references: [citizenId], onUpdate: NoAction, onDelete: NoAction)
+
+  @@map("BANSOS_VALIDATION")
+}
+
+model DistributionReport {
+  reportId       String @id @unique @map("report_id")
+  governmentId   String? @map("government_id")
+  aidId          String? @map("aid_id")
+  totalRecipients String? @map("total_recipients")
+  reportDate     DateTime? @db.Date @map("report_date")
+  aidProgram     AidProgram? @relation(fields: [aidId], references: [aidId], onUpdate: NoAction, onDelete: NoAction)
+
+  @@map("DISTRIBUTION_REPORT")
+}
+
+>>>>>>> 7aad3534e278b06ae17bb209a58f850b02e5e641
