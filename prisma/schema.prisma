@@ -1,0 +1,103 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Role {
+  roleId   String  @id @map("role_id")
+  roleName String? @map("role_name")
+  users    User[]  
+
+  @@map("ROLES")
+}
+
+model User {
+  userId   String  @id @default(uuid()) @map("user_id")
+  username String? @unique @map("username")
+  password String? @map("password")
+  roleId   String? @map("role_id")
+  role     Role?   @relation(fields: [roleId], references: [roleId])
+
+  @@map("USERS")
+}
+
+model Rt {
+  rtId     String    @id @map("rt_id")
+  rtName   String?   @map("rt_name")
+  citizens Citizen[]
+
+  @@map("RT")
+}
+
+model Citizen {
+  citizenId        String    @id @default(uuid()) @map("citizen_id") 
+  rtId             String?   @map("rt_id")
+  idCardNumber     String?   @unique @map("id_card_number") 
+  familyCardNumber String?   @map("family_card_number")
+  firstName        String?   @map("first_name") 
+  birthDate        DateTime? @db.Date @map("birth_date")
+  gender           String?   @map("gender")
+  age              Int?      @map("age") 
+  address          String?   @map("address")
+  occupation       String?   @map("occupation")
+  monthlyIncome    String?   @map("monthly_income")
+  aidStatus        String?   @map("aid_status")
+  rt               Rt?       @relation(fields: [rtId], references: [rtId])
+  aidRecipients    AidRecipient[]
+  validations      BansosValidation[]
+
+  @@map("CITIZENS")
+}
+
+model AidProgram {
+  aidId                         String    @id @map("aid_id")
+  aidName                       String?   @map("aid_name")
+  descriptionOfSocialAssistance String?   @map("description_of_social_assistance")
+  startDate                     DateTime? @db.Date @map("start_date")
+  endDate                       DateTime? @db.Date @map("end_date")
+  status                        String?   @map("status")
+  aidRecipients       AidRecipient[]
+  distributionReports DistributionReport[]
+
+  @@map("AID_PROGRAMS")
+}
+
+model AidRecipient {
+  recipientId     String    @id @default(uuid()) @map("recipient_id") 
+  citizenId       String?   @map("citizen_id")
+  aidId           String?   @map("aid_id")
+  receiveDate     DateTime? @db.Date @map("receive_date")
+  recipientStatus String?   @map("recipient_status")
+  citizen    Citizen?    @relation(fields: [citizenId], references: [citizenId])
+  aidProgram AidProgram? @relation(fields: [aidId], references: [aidId])
+
+  @@map("AID_RECIPIENTS")
+}
+
+model BansosValidation {
+  validationId     String   @id @default(uuid()) @map("validation_id") 
+  userId           String?  @map("user_id") 
+  citizenId        String?  @map("citizen_id")
+  validationResult Boolean? @map("validation_result")
+  notes            String?  @map("notes")
+  citizen Citizen? @relation(fields: [citizenId], references: [citizenId])
+
+  @@map("BANSOS_VALIDATIONS")
+}
+
+model DistributionReport {
+  reportId        String    @id @default(uuid()) @map("report_id") 
+  governmentId    String?   @map("government_id")
+  aidId           String?   @map("aid_id")
+  totalRecipients String?   @map("total_recipients")
+  reportDate      DateTime? @db.Date @map("report_date")
+  aidProgram AidProgram? @relation(fields: [aidId], references: [aidId])
+
+  @@map("DISTRIBUTION_REPORTS")
+}
