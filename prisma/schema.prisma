@@ -11,3 +11,100 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model ROLES {
+  id_role  String   @id @map("id_role")
+  role_name String  @map("role_name")
+
+  users USERS[]
+
+  @@map("ROLES")
+}
+
+model USERS {
+  user_id  String   @id @map("user_id")
+  username String?  @unique @map("username")
+  password String?  @map("password")
+  id_role  String?  @map("id_role")
+
+  role            ROLES?             @relation(fields: [id_role], references: [id_role], onUpdate: NoAction, onDelete: NoAction)
+  citizenData     CITIZEN_DATA[]
+  adminValidation DATA_VALIDATION[]  @relation("AdminUser")
+  govtReport      DISTRIBUTION_REPORT[] @relation("GovernmentUser")
+
+  @@map("USERS")
+}
+
+model CITIZEN_DATA {
+  citizen_id        String   @id @map("citizen_id")
+  user_id           String?  @map("user_id")
+  id_rt             String?  @map("id_rt")
+  id_card_number    Int?     @map("id_card_number")
+  birth_date        DateTime? @map("birth_date")
+  gender            String?  @map("gender")
+  age               Int?     @map("age")
+  address           String?  @map("address")
+  family_card_number Int?    @map("family_card_number")
+  occupation        String?  @map("occupation")
+  monthly_income    String?  @map("monthly_income")
+  aid_status        String?  @map("aid_status")
+
+  user            USERS?             @relation(fields: [user_id], references: [user_id], onUpdate: NoAction, onDelete: NoAction)
+  aidRecipient    AID_RECIPIENT[]
+  dataValidation  DATA_VALIDATION[]
+
+  @@map("CITIZEN_DATA")
+}
+
+model AID_PROGRAM {
+  aid_id          String   @id @map("aid_id")
+  aid_name        String?  @map("aid_name")
+  description     String?  @map("description")
+  start_date      DateTime? @map("start_date")
+  end_date        DateTime? @map("end_date")
+  status          String?  @map("status")
+
+  aidRecipient       AID_RECIPIENT[]
+  distributionReport DISTRIBUTION_REPORT[]
+
+  @@map("AID_PROGRAM")
+}
+
+model AID_RECIPIENT {
+  recipient_id    String   @id @map("recipient_id")
+  citizen_id      String?  @map("citizen_id")
+  aid_id          String?  @map("aid_id")
+  receive_date    DateTime? @map("receive_date")
+  recipient_status String?  @map("recipient_status")
+
+  citizenData CITIZEN_DATA? @relation(fields: [citizen_id], references: [citizen_id], onUpdate: NoAction, onDelete: NoAction)
+  aidProgram  AID_PROGRAM?  @relation(fields: [aid_id], references: [aid_id], onUpdate: NoAction, onDelete: NoAction)
+
+  @@map("AID_RECIPIENT")
+}
+
+model DATA_VALIDATION {
+  validation_id    String   @id @map("validation_id")
+  admin_user_id    String?  @map("admin_user_id")
+  citizen_id       String?  @map("citizen_id")
+  validation_result Boolean? @map("validation_result")
+  notes            String?  @map("notes")
+
+  adminUser  USERS?        @relation("AdminUser", fields: [admin_user_id], references: [user_id], onUpdate: NoAction, onDelete: NoAction)
+  citizenData CITIZEN_DATA? @relation(fields: [citizen_id], references: [citizen_id], onUpdate: NoAction, onDelete: NoAction)
+
+  @@map("DATA_VALIDATION")
+}
+
+model DISTRIBUTION_REPORT {
+  report_id         String   @id @map("report_id")
+  government_user_id String? @map("government_user_id")
+  aid_id            String?  @map("aid_id")
+  total_recipients  Int?     @map("total_recipients")
+  report_date       DateTime? @map("report_date")
+
+  governmentUser USERS?      @relation("GovernmentUser", fields: [government_user_id], references: [user_id], onUpdate: NoAction, onDelete: NoAction)
+  aidProgram     AID_PROGRAM? @relation(fields: [aid_id], references: [aid_id], onUpdate: NoAction, onDelete: NoAction)
+
+  @@map("DISTRIBUTION_REPORT")
+}
